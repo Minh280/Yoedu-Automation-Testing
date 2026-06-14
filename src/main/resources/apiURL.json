@@ -1,0 +1,11 @@
+{
+    "context": {
+        "token": "/ids/connect/token",
+        "api": "/investment/api/v1"
+    },
+    "endpoint": {
+        "auth": "/oauth/token",
+        "investmentPackage": "/investment-packages",
+        "investmentPackageCompact": "/investment-packages/compact"
+    }
+}
