@@ -43,7 +43,6 @@ public class LoginStep {
     @Given("Tôi mở trang đăng nhập Yoedu")
     public void openLoginPage() throws Throwable {
         try {
-            System.out.println("Điều hướng đến trang đăng nhập Yoedu");
             loginPage.navigateToLogin("https://management.yoedu.vn/login");
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -53,7 +52,6 @@ public class LoginStep {
     @When("Tôi thực hiện đăng nhập với tài khoản {string} và mật khẩu {string}")
     public void enterCredentials(String username, String password) throws Throwable {
         try {
-            System.out.println("Thực hiện nhập credentials và click Login");
             loginPage.login(username, password);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -124,4 +122,5 @@ public class LoginStep {
             Assert.fail(e.getMessage());
         }
     }
+
 }
