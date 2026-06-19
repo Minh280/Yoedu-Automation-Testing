@@ -19,7 +19,7 @@ Feature: Kiểm thử các trường hợp dữ liệu lỗi chức năng Học 
       | 0912          | Nguyễn Văn B | 20/05/2015 | Số điện thoại không đúng, vui lòng nhập lại   | Bỏ qua     |
       | 0901234567    | Nguyễn Văn B | abcde      | Vui lòng chọn ngày sinh                       | Bỏ qua     |
 
-  @Validation @EditStudentError
+  @Validation @EditStudentError #Blocked
   Scenario Outline: Chỉnh sửa học viên không thành công do xóa dữ liệu bắt buộc
     Given Tôi thực hiện mở menu và điều hướng đến mục Học viên
     And Tôi tìm kiếm học viên bằng từ khóa "<ma_hoc_vien>"
@@ -32,7 +32,7 @@ Feature: Kiểm thử các trường hợp dữ liệu lỗi chức năng Học 
       | HV1781      |         | Vui lòng nhập tên! |
 
   @Validation @SearchStudentError
-  Scenario: Tìm kiếm thông thường học viên không ra kết quả
+  Scenario: Tìm kiếm học viên không tồn tại
     Given Tôi thực hiện mở menu và điều hướng đến mục Học viên
     When Tôi tìm kiếm học viên bằng từ khóa "KJHDKJ123_RAC"
 

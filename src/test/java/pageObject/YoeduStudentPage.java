@@ -52,8 +52,7 @@ public class YoeduStudentPage {
     private final By lblEmptyTableMessage = By.xpath("//td[contains(text(), 'Không tìm thấy') or contains(text(), 'Không có dữ liệu')] | //div[contains(text(), 'Không tìm thấy')]");
 
     private By btnThreeDotsByText(String textVal) {
-        return By.xpath("//tr[.//td//*[contains(text(),'" + textVal + "')] or .//td[contains(text(),'" + textVal + "')]]//div[@class='pointer']" +
-                " | //tr[.//td//*[contains(text(),'" + textVal + "')] or .//td[contains(text(),'" + textVal + "')]]//button[contains(@class, 'MuiButtonBase-root')]//span[text()='•••']");
+        return By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + textVal + "')]]//div[@class='pointer']");
     }
 
     public YoeduStudentPage(WebDriver driver) {
@@ -148,21 +147,33 @@ public class YoeduStudentPage {
             clearAndSendKeys(searchInput, keyword);
             searchInput.sendKeys(Keys.ENTER);
 
+            By specificRow = By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + keyword + "')]]");
+            commonFunction.waitUntilElementLocated(driver, specificRow, intTimeOut);
+
         } catch (Exception e) {
+            Assert.fail("Lỗi khi tìm kiếm học viên với từ khóa [" + keyword + "]: " + e.getMessage());
         }
     }
 
     public void clickActionMenuByStudentText(String studentVal, String actionType) {
         try {
+
+            By specificRow = By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + studentVal + "')]]");
+            commonFunction.waitUntilElementLocated(driver, specificRow, intTimeOut);
+
+            try { Thread.sleep(600); } catch (InterruptedException ignored) {}
+
             By targetThreeDots = btnThreeDotsByText(studentVal);
-            commonFunction.waitUntilElementLocated(driver, targetThreeDots, intTimeOut);
             driver.findElement(targetThreeDots).click();
 
-            By menuAction = By.xpath("//li[contains(@class, 'MuiMenuItem-root') and (text()='" + actionType + "' or contains(., '" + actionType + "'))]");
+            try { Thread.sleep(400); } catch (InterruptedException ignored) {}
+
+            By menuAction = By.xpath("//li[contains(@class, 'MuiMenuItem-root') and (normalize-space(.)='" + actionType + "')]");
             commonFunction.waitUntilElementLocated(driver, menuAction, intTimeOut);
             driver.findElement(menuAction).click();
+
         } catch (Exception e) {
-            Assert.fail("Lỗi khi mở menu tác vụ [" + actionType + "] của học viên: " + e.getMessage());
+            Assert.fail("Lỗi khi mở menu tác vụ [" + actionType + "] của học viên [" + studentVal + "]: " + e.getMessage());
         }
     }
 
