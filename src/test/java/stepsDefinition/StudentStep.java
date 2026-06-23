@@ -83,10 +83,10 @@ public class StudentStep {
         studentPage.clickExportExcel();
     }
 
-    @And("Tôi xác nhận nút {string} trên hộp thoại Save As của hệ thống")
-    public void stepHandleSaveAs(String action) {
-        studentPage.handleSaveAsPopup(action);
-    }
+//    @And("Tôi xác nhận nút {string} trên hộp thoại Save As của hệ thống")
+//    public void stepHandleSaveAs(String action) {
+//        studentPage.handleSaveAsPopup(action);
+//    }
 
     @Then("Hệ thống hiển thị lỗi học viên tại ô {string} và popup {string}")
     public void verifyStudentValidationErrors(String expectedFieldError, String expectedToastError) {

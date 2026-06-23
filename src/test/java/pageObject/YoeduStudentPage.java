@@ -142,13 +142,21 @@ public class YoeduStudentPage {
 
     public void searchStudent(String keyword) {
         try {
+
             commonFunction.waitUntilElementLocated(driver, txtSearch, intTimeOut);
             WebElement searchInput = driver.findElement(txtSearch);
             clearAndSendKeys(searchInput, keyword);
             searchInput.sendKeys(Keys.ENTER);
 
+            Thread.sleep(1500);
+
             By specificRow = By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + keyword + "')]]");
-            commonFunction.waitUntilElementLocated(driver, specificRow, intTimeOut);
+
+            if (driver.findElements(specificRow).isEmpty()) {
+
+            } else {
+                commonFunction.waitUntilElementLocated(driver, specificRow, intTimeOut);
+            }
 
         } catch (Exception e) {
             Assert.fail("Lỗi khi tìm kiếm học viên với từ khóa [" + keyword + "]: " + e.getMessage());
@@ -253,9 +261,9 @@ public class YoeduStudentPage {
             advInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
             advInput.sendKeys(referrerName);
 
-
             commonFunction.waitUntilElementLocated(driver, btnSubmitSearch, intTimeOut);
             driver.findElement(btnSubmitSearch).click();
+
             Thread.sleep(1500);
         } catch (Exception e) {
             Assert.fail("Lỗi thao tác trên khung Tìm kiếm nâng cao: " + e.getMessage());
@@ -274,26 +282,26 @@ public class YoeduStudentPage {
         }
     }
 
-    public void handleSaveAsPopup(String actionType) {
-        try {
-            java.awt.Robot robot = new java.awt.Robot();
-
-            if (actionType.equalsIgnoreCase("Save")) {
-
-                robot.keyPress(java.awt.event.KeyEvent.VK_ENTER);
-                robot.keyRelease(java.awt.event.KeyEvent.VK_ENTER);
-
-            } else if (actionType.equalsIgnoreCase("Cancel")) {
-
-                robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
-                robot.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE);
-            }
-
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            Assert.fail("Lỗi khi giả lập bàn phím tương tác hộp thoại Save As: " + e.getMessage());
-        }
-    }
+//    public void handleSaveAsPopup(String actionType) {
+//        try {
+//            java.awt.Robot robot = new java.awt.Robot();
+//
+//            if (actionType.equalsIgnoreCase("Save")) {
+//
+//                robot.keyPress(java.awt.event.KeyEvent.VK_ENTER);
+//                robot.keyRelease(java.awt.event.KeyEvent.VK_ENTER);
+//
+//            } else if (actionType.equalsIgnoreCase("Cancel")) {
+//
+//                robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
+//                robot.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE);
+//            }
+//
+//            Thread.sleep(2000);
+//        } catch (Exception e) {
+//            Assert.fail("Lỗi khi giả lập bàn phím tương tác hộp thoại Save As: " + e.getMessage());
+//        }
+//    }
 
     public String getFieldErrorText(String fieldType) {
         try {

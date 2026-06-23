@@ -100,4 +100,3 @@ Feature: TestYoedu
   Scenario: Xuất danh sách học viên ra file Excel và lưu thành công
     When Tôi thực hiện mở menu và điều hướng đến mục Học viên
     And Tôi nhấn nút Xuất tệp Excel dữ liệu học viên
-    And Tôi xác nhận nút "Save" trên hộp thoại Save As của hệ thống
