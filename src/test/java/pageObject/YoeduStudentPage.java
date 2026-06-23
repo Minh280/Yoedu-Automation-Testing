@@ -142,23 +142,29 @@ public class YoeduStudentPage {
 
     public void searchStudent(String keyword) {
         try {
-
             commonFunction.waitUntilElementLocated(driver, txtSearch, intTimeOut);
             WebElement searchInput = driver.findElement(txtSearch);
             clearAndSendKeys(searchInput, keyword);
             searchInput.sendKeys(Keys.ENTER);
 
-            Thread.sleep(1500);
+            Thread.sleep(1500); // Chờ 1.5 giây để bảng cập nhật xong
 
-            By specificRow = By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + keyword + "')]]");
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(0));
 
-            if (driver.findElements(specificRow).isEmpty()) {
+            By allRowsInTable = By.xpath("//tbody/tr");
+            int totalRows = driver.findElements(allRowsInTable).size();
 
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(20));
+
+            if (totalRows == 0) {
+                Assert.assertTrue("Xác thực kịch bản Unhappy Case thành công: Không tìm thấy học viên nào với từ khóa [" + keyword + "].", totalRows == 0);
             } else {
+                By specificRow = By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + keyword + "')]]");
                 commonFunction.waitUntilElementLocated(driver, specificRow, intTimeOut);
             }
 
         } catch (Exception e) {
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(20));
             Assert.fail("Lỗi khi tìm kiếm học viên với từ khóa [" + keyword + "]: " + e.getMessage());
         }
     }
@@ -250,7 +256,6 @@ public class YoeduStudentPage {
 
     public void searchAdvanced(String referrerName) {
         try {
-
             commonFunction.waitUntilElementLocated(driver, btnFilterFunnel, intTimeOut);
             driver.findElement(btnFilterFunnel).click();
             Thread.sleep(500);
@@ -265,8 +270,24 @@ public class YoeduStudentPage {
             driver.findElement(btnSubmitSearch).click();
 
             Thread.sleep(1500);
+
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(0));
+
+            By allRowsInTable = By.xpath("//tbody/tr");
+            int totalRows = driver.findElements(allRowsInTable).size();
+
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(20));
+
+            if (totalRows == 0) {
+                Assert.assertTrue("Xác thực kịch bản Unhappy Case thành công: Không tìm thấy kết quả cho người giới thiệu [" + referrerName + "].", totalRows == 0);
+            } else {
+                By specificRow = By.xpath("//tr[descendant::*[contains(normalize-space(.), '" + referrerName + "')]]");
+                commonFunction.waitUntilElementLocated(driver, specificRow, intTimeOut);
+            }
+
         } catch (Exception e) {
-            Assert.fail("Lỗi thao tác trên khung Tìm kiếm nâng cao: " + e.getMessage());
+            driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(20));
+            Assert.fail("Lỗi thao tác hoặc xác thực trên khung Tìm kiếm nâng cao: " + e.getMessage());
         }
     }
 
