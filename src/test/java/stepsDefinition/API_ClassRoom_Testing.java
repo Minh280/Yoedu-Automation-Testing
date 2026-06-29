@@ -76,6 +76,79 @@ public class API_ClassRoom_Testing {
             Assert.fail("Lỗi kiểm tra JSON Response: " + e.getMessage());
         }
     }
+
+    // ==========================================
+    // CHỨC NĂNG: TẠO MỚI PHÒNG HỌC (POST - FORM)
+    // ==========================================
+    @When("I execute the create classroom API with valid information")
+    public void i_execute_the_create_classroom_api_with_valid_information() {
+        try {
+            String token = System.getProperty("access_token");
+            if (token == null || token.isEmpty()) {
+                Assert.fail("Lỗi: Không tìm thấy Access Token để thực thi tạo mới phòng học!");
+            }
+
+            String createUrl = "https://apigateway.yoot.vn/yoedu/management/api/class-rooms";
+            System.out.println(">>> API Create Classroom đang gọi (POST): " + createUrl);
+
+            // Sinh mã code và tên động bằng timestamp để tránh trùng lặp dữ liệu hệ thống
+            long timestamp = System.currentTimeMillis();
+            String dynamicCode = "PH_" + timestamp;
+            String dynamicName = "Phòng Học Tự Động " + timestamp;
+
+            // Tạo Map tham số dạng Form tương tự như hàm Edit phòng học của bạn
+            Map<String, Object> formFields = new LinkedHashMap<>();
+            formFields.put("code", dynamicCode);
+            formFields.put("name", dynamicName);
+            formFields.put("description", "API CreateClassroom Testing");
+            formFields.put("note", "");
+            formFields.put("photo", "");
+            formFields.put("branchId", 1);
+            formFields.put("capacity", 40);
+            formFields.put("isActive", true);
+
+            // Gửi request POST dưới dạng x-www-form-urlencoded
+            response = given()
+                    .relaxedHTTPSValidation()
+                    .contentType("application/x-www-form-urlencoded; charset=UTF-8")
+                    .header("Authorization", "Bearer " + token)
+                    .formParams(formFields)
+                    .when()
+                    .post(createUrl)
+                    .then()
+                    .extract()
+                    .response();
+
+        } catch (Exception e) {
+            Assert.fail("Lỗi khi thực thi API POST Tạo mới phòng học: " + e.getMessage());
+        }
+    }
+
+    @Then("I verify the classroom creation response is successful")
+    public void i_verify_the_classroom_creation_response_is_successful() {
+        try {
+            // Xác nhận tạo mới thành công (200 OK)
+            assertEquals(200, response.statusCode());
+
+            JSONObject jsonResponse = new JSONObject(response.getBody().asString());
+            assertTrue("Tạo mới phòng học thất bại, 'succeeded' là false!", jsonResponse.getBoolean("succeeded"));
+
+            Assert.assertFalse("Trường 'data' bị null khi tạo mới", jsonResponse.isNull("data"));
+            JSONObject dataObject = jsonResponse.getJSONObject("data");
+
+            System.out.println(">>> TẠO MỚI PHÒNG HỌC THÀNH CÔNG!");
+            System.out.println("    - ID Phòng vừa tạo: " + dataObject.get("id").toString());
+            System.out.println("    - Mã phòng (Code): " + dataObject.optString("code"));
+            System.out.println("    - Tên phòng (Name): " + dataObject.optString("name"));
+
+            // Lưu lại ID vừa tạo vào bộ nhớ hệ thống (để có thể tái sử dụng cho view/edit/delete nếu cần)
+            System.setProperty("created_classroom_id", dataObject.get("id").toString());
+
+        } catch (Exception e) {
+            Assert.fail("Lỗi kiểm tra dữ liệu JSON Tạo mới phòng học: " + e.getMessage());
+        }
+    }
+
     // ==========================================
     // CHỨC NĂNG: TÌM KIẾM PHÒNG HỌC (PAGING)
     // ==========================================
@@ -83,7 +156,7 @@ public class API_ClassRoom_Testing {
     @When("I execute the search classroom API with pagination information")
     public void i_execute_the_search_classroom_api_with_pagination_information() {
         try {
-            // KHẮC PHỤC LỖI 404: Sử dụng trực tiếp URL tuyệt đối giống bước Login để tránh bị ghi đè domain
+
             String searchUrl = "https://apigateway.yoot.vn/yoedu/management/api/class-rooms/paging";
 
             String token = System.getProperty("access_token");
@@ -145,7 +218,7 @@ public class API_ClassRoom_Testing {
                 JSONObject firstClassroom = classroomList.getJSONObject(0);
                 String dynamicId = firstClassroom.get("id").toString();
 
-                // Lưu lại ID này để bước Chỉnh sửa phía sau bóc ra dùng luôn
+                // Lưu lại ID này để bước Chỉnh sửa phía sau
                 System.setProperty("edit_classroom_id", dynamicId);
                 System.out.println(">>> Đã bắt được ID phòng học động để chỉnh sửa: " + dynamicId);
             } else {
@@ -278,7 +351,7 @@ public class API_ClassRoom_Testing {
             // Bóc tách dữ liệu từ object "data" (Key chữ thường theo đúng ảnh Postman)
             JSONObject dataObject = jsonResponse.getJSONObject("data");
 
-            System.out.println(">>> CHỈNH SỬA PHÒNG HỌC THÀNH CÔNG THỰC SỰ!");
+            System.out.println(">>> CHỈNH SỬA PHÒNG HỌC THÀNH CÔNG!");
             System.out.println("    - ID Phòng học: " + dataObject.optInt("id"));
             System.out.println("    - Mã phòng mới: " + dataObject.optString("code"));
             System.out.println("    - Tên phòng mới: " + dataObject.optString("name"));
@@ -286,6 +359,57 @@ public class API_ClassRoom_Testing {
 
         } catch (Exception e) {
             Assert.fail("Lỗi kiểm tra dữ liệu JSON Chỉnh sửa phòng học: " + e.getMessage());
+        }
+    }
+
+    // ==========================================
+    // CHỨC NĂNG: XÓA PHÒNG HỌC (DELETE)
+    // ==========================================
+    @When("I execute the delete classroom API for the retrieved classroom id")
+    public void i_execute_the_delete_classroom_api_for_the_retrieved_classroom_id() {
+        try {
+            // Lấy ID động từ bộ nhớ hệ thống do bước Tìm kiếm (Paging) lưu lại
+            String dynamicId = System.getProperty("edit_classroom_id");
+            String token = System.getProperty("access_token");
+
+            if (dynamicId == null || dynamicId.isEmpty()) {
+                Assert.fail("Lỗi: Không tìm thấy ID phòng học động để thực thi xóa!");
+            }
+
+            // Endpoint xóa phòng học theo ID động: .../class-rooms/{id}
+            String deleteUrl = "https://apigateway.yoot.vn/yoedu/management/api/class-rooms/" + dynamicId;
+            System.out.println(">>> API Delete Classroom đang gọi (DELETE): " + deleteUrl);
+
+            // Thực hiện gọi API phương thức DELETE
+            response = given()
+                    .relaxedHTTPSValidation()
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .delete(deleteUrl)
+                    .then()
+                    .extract()
+                    .response();
+
+        } catch (Exception e) {
+            Assert.fail("Lỗi khi thực thi API DELETE Xóa phòng học: " + e.getMessage());
+        }
+    }
+
+    @Then("I verify the classroom delete response is successful")
+    public void i_verify_the_classroom_delete_response_is_successful() {
+        try {
+            // Xác nhận xóa thành công (200 OK)
+            assertEquals(200, response.statusCode());
+
+            JSONObject jsonResponse = new JSONObject(response.getBody().asString());
+            assertTrue("Xóa phòng học thất bại, 'succeeded' là false!", jsonResponse.getBoolean("succeeded"));
+
+            System.out.println(">>> XÓA PHÒNG HỌC KHỎI HỆ THỐNG THÀNH CÔNG!");
+            System.out.println("    - Response Message: " + jsonResponse.optString("message", "Deleted Successfully"));
+
+        } catch (Exception e) {
+            Assert.fail("Lỗi kiểm tra dữ liệu JSON Xóa phòng học: " + e.getMessage());
         }
     }
 }

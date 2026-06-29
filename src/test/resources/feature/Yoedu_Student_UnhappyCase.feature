@@ -20,7 +20,7 @@ Feature: Kiểm thử các trường hợp dữ liệu lỗi chức năng Học 
       | 0901234567    | Nguyễn Văn B | abcde      | Vui lòng chọn ngày sinh                       | Bỏ qua     |
       | 0901234AAA    | Nguyễn Văn B | 20/05/2015 | Số điện thoại không đúng, vui lòng nhập lại   | Bỏ qua    |
       | 0901234567    | Nguyễn Văn B | 25/12/2030 | Ngày sinh không hợp lệ                        | Bỏ qua    |
-    #25/12/2030 -> ngày sinh không hợp lệ -> gui vẫn cho phép lưu nên test case không bắt được lỗi -> fail
+    #25/12/2030 -> ngày sinh không hợp lệ -> gui vẫn cho phép lưu nên test case không bắt được lỗi -> fail -> log submit bug
 
   @Validation @EditStudentError #Blocked
   Scenario Outline: Chỉnh sửa học viên không thành công do xóa dữ liệu bắt buộc
